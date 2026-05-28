@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EmployeeRank – Profile</title>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/profile.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        .pub-layout { max-width:900px; margin:0 auto; padding:32px 24px; }
+        .pub-header {
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-xl);
+            padding:36px; display:flex; gap:28px; align-items:flex-start; margin-bottom:24px;
+        }
+        .pub-avatar {
+            width:100px; height:100px; border-radius:50%;
+            border:3px solid var(--accent); background:var(--bg-3);
+            display:flex; align-items:center; justify-content:center;
+            font-family:var(--font-display); font-weight:800; font-size:2.2rem; color:var(--accent);
+            flex-shrink:0; overflow:hidden;
+        }
+        .pub-avatar img { width:100%; height:100%; object-fit:cover; }
+        .pub-info { flex:1; }
+        .pub-name { font-family:var(--font-display); font-size:1.6rem; font-weight:800; margin-bottom:4px; }
+        .pub-title { font-size:0.9rem; color:var(--accent); font-weight:500; margin-bottom:6px; }
+        .pub-company { font-size:0.82rem; color:var(--text-2); margin-bottom:14px; }
+        .pub-bio { font-size:0.88rem; color:var(--text-2); line-height:1.6; margin-bottom:16px; }
+        .pub-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+        .pub-tag { padding:4px 12px; border-radius:999px; border:1px solid var(--border); color:var(--text-2); font-size:0.75rem; }
+        .pub-links { display:flex; gap:10px; flex-wrap:wrap; }
+        .pub-stat-row {
+            display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px;
+        }
+        .pub-stat-card {
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg);
+            padding:18px; text-align:center;
+        }
+        .pub-stat-val { font-family:var(--font-display); font-weight:800; font-size:1.6rem; color:var(--accent); }
+        .pub-stat-lbl { font-size:0.72rem; color:var(--text-3); margin-top:4px; }
+        .pub-section { background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:22px; margin-bottom:20px; }
+        .pub-section h3 { font-family:var(--font-display); font-size:1rem; font-weight:700; margin-bottom:16px; }
+        .pub-badges-grid { display:flex; flex-wrap:wrap; gap:10px; }
+        .pub-badge-item {
+            display:flex; align-items:center; gap:10px;
+            background:var(--bg-3); border:1px solid var(--border); border-radius:var(--radius);
+            padding:10px 14px;
+        }
+        .skill-chip { padding:4px 12px; background:var(--bg-3); border:1px solid var(--border); border-radius:999px; font-size:0.78rem; color:var(--text-2); }
+        .back-link { display:inline-flex; align-items:center; gap:6px; color:var(--text-2); font-size:0.85rem; margin-bottom:20px; transition:var(--transition); }
+        .back-link:hover { color:var(--accent); }
+        @media(max-width:600px){ .pub-header{flex-direction:column;} .pub-stat-row{grid-template-columns:1fr 1fr;} }
+    </style>
+</head>
+<body style="background:var(--bg);color:var(--text);font-family:var(--font-body)">
+
+<div class="pub-layout">
+    <a href="/leaderboard" class="back-link">← Back to Leaderboard</a>
+
+    <div id="loadingState" class="empty-state">Loading profile…</div>
+    <div id="profileContent" style="display:none">
+
+        <div class="pub-header">
+            <div class="pub-avatar" id="pubAvatar">?</div>
+            <div class="pub-info">
+                <div class="pub-name" id="pubName">—</div>
+                <div class="pub-title" id="pubTitle">—</div>
+                <div class="pub-company" id="pubCompany"></div>
+                <div class="pub-bio" id="pubBio"></div>
+                <div class="pub-tags" id="pubSkillTags"></div>
+                <div class="pub-links" id="pubLinks"></div>
+            </div>
+            <div style="text-align:center;flex-shrink:0">
+                <div class="grade-pill" id="pubGradePill" style="width:48px;height:48px;margin:0 auto;font-size:1rem">—</div>
+                <div style="font-size:0.7rem;color:var(--text-3);margin-top:6px">Latest Grade</div>
+            </div>
+        </div>
+
+        <div class="pub-stat-row">
+            <div class="pub-stat-card">
+                <div class="pub-stat-val" id="pubCredits">—</div>
+                <div class="pub-stat-lbl">Total Credits</div>
+            </div>
+            <div class="pub-stat-card">
+                <div class="pub-stat-val" id="pubExperience">—</div>
+                <div class="pub-stat-lbl">Years Experience</div>
+            </div>
+            <div class="pub-stat-card">
+                <div class="pub-stat-val" id="pubBadgeCount">—</div>
+                <div class="pub-stat-lbl">Badges Earned</div>
+            </div>
+        </div>
+
+        <!-- BADGES -->
+        <div class="pub-section" id="badgesSection" style="display:none">
+            <h3>🏅 Achievements</h3>
+            <div class="pub-badges-grid" id="pubBadgesGrid"></div>
+        </div>
+
+        <!-- PERFORMANCE HISTORY -->
+        <div class="pub-section" id="perfSection" style="display:none">
+            <h3>📈 Recent Performance</h3>
+            <div id="pubPerfList"></div>
+        </div>
+
+    </div>
+    <div id="privateState" style="display:none" class="empty-state">
+        <div style="font-size:3rem;margin-bottom:12px">🔒</div>
+        <div>This profile is private.</div>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const username = window.location.pathname.split('/').pop();
+    try {
+        const res = await api.getPublicProfile(username);
+        const u = res.data;
+        document.title = `${u.fullName || u.username} – EmployeeRank`;
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('profileContent').style.display = 'block';
+
+        const initials = (u.fullName || u.username || '?')[0].toUpperCase();
+        const avatarEl = document.getElementById('pubAvatar');
+        avatarEl.textContent = initials;
+        if (u.profilePicture) avatarEl.innerHTML = `<img src="${u.profilePicture}" alt=""/>`;
+
+        document.getElementById('pubName').textContent    = u.fullName || u.username;
+        document.getElementById('pubTitle').textContent   = u.jobTitle || '';
+        document.getElementById('pubCompany').textContent = u.companyName ? `🏢 ${u.companyName}` : '';
+        document.getElementById('pubBio').textContent     = u.bio || '';
+        document.getElementById('pubCredits').textContent = u.totalCredits ?? 0;
+        document.getElementById('pubExperience').textContent = u.yearsOfExperience ? `${u.yearsOfExperience}y` : '—';
+        document.getElementById('pubBadgeCount').textContent = (u.badges || []).length;
+
+        // Skills
+        const skillsEl = document.getElementById('pubSkillTags');
+        if (u.skills) {
+            u.skills.split(',').forEach(s => {
+                const chip = document.createElement('span');
+                chip.className = 'skill-chip';
+                chip.textContent = s.trim();
+                skillsEl.appendChild(chip);
+            });
+        }
+
+        // Links
+        const linksEl = document.getElementById('pubLinks');
+        if (u.linkedinUrl)   linksEl.innerHTML += `<a href="${u.linkedinUrl}"  target="_blank" class="pub-tag">in LinkedIn</a>`;
+        if (u.githubUrl)     linksEl.innerHTML += `<a href="${u.githubUrl}"    target="_blank" class="pub-tag">⌥ GitHub</a>`;
+        if (u.portfolioUrl)  linksEl.innerHTML += `<a href="${u.portfolioUrl}" target="_blank" class="pub-tag">↗ Portfolio</a>`;
+
+        // Latest grade
+        if (u.recentResults && u.recentResults.length) {
+            const latest = u.recentResults[0];
+            const gradeEl = document.getElementById('pubGradePill');
+            gradeEl.textContent = latest.grade || '—';
+            gradeEl.className = `grade-pill ${gradeClass(latest.grade)}`;
+        }
+
+        // Badges
+        if (u.badges && u.badges.length) {
+            document.getElementById('badgesSection').style.display = 'block';
+            document.getElementById('pubBadgesGrid').innerHTML = u.badges.map(b => `
+            <div class="pub-badge-item">
+                <div class="badge-icon badge-${b.badgeType}">${badgeEmoji(b.badgeType)}</div>
+                <div>
+                    <div style="font-size:0.85rem;font-weight:600">${b.badgeName}</div>
+                    <div style="font-size:0.72rem;color:var(--text-3)">${b.awardedMonth ? formatMonth(b.awardedMonth, b.awardedYear) : ''}</div>
+                </div>
+            </div>`).join('');
+        }
+
+        // Performance history
+        if (u.recentResults && u.recentResults.length) {
+            document.getElementById('perfSection').style.display = 'block';
+            document.getElementById('pubPerfList').innerHTML = u.recentResults.map(r => `
+            <div style="display:grid;grid-template-columns:100px 50px 1fr 60px 90px;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+                <span style="font-weight:600">${formatMonth(r.resultMonth, r.resultYear)}</span>
+                <span class="grade-pill ${gradeClass(r.grade)}" style="width:36px;height:36px">${r.grade}</span>
+                <div style="height:6px;background:var(--bg-3);border-radius:999px;overflow:hidden">
+                    <div style="height:100%;background:var(--accent);border-radius:999px;width:${r.percentageScore}%"></div>
+                </div>
+                <span style="color:var(--accent);font-family:var(--font-display);font-weight:700">${r.percentageScore?.toFixed(1)}%</span>
+                <span style="font-size:0.75rem;color:var(--text-2)">${r.performanceCategory}</span>
+            </div>`).join('');
+        }
+
+    } catch (err) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('privateState').style.display = 'block';
+    }
+});
+</script>
+</body>
+</html>

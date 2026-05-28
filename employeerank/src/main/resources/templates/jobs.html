@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EmployeeRank – Job Board</title>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/jobs.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Employee<strong>Rank</strong></span>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item">▦ Dashboard</a>
+        <a href="/scores" class="nav-item">◈ My Scores</a>
+        <a href="/results" class="nav-item">◉ Monthly Results</a>
+        <a href="/leaderboard" class="nav-item">◆ Leaderboard</a>
+        <a href="/jobs" class="nav-item active">◎ Job Board</a>
+        <a href="/profile" class="nav-item">◯ Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-chip-avatar" id="sidebarAvatar">?</div>
+            <div class="user-chip-info">
+                <span class="user-chip-name" id="sidebarName">Loading...</span>
+                <span class="user-chip-role" id="sidebarRole">—</span>
+            </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">↪ Logout</button>
+    </div>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div class="top-bar-title">
+            <h1>Job Board</h1>
+            <span>Opportunities unlocked by your credits</span>
+        </div>
+        <div class="top-bar-actions">
+            <div class="credits-badge" id="creditsBadge">
+                <span>✦</span> <span id="headerCredits">—</span> credits
+            </div>
+            <button class="btn-primary" id="postJobBtn" style="display:none">+ Post Job</button>
+        </div>
+    </header>
+
+    <div class="page active">
+        <div class="jobs-tabs">
+            <button class="job-tab active" data-tab="eligible">✓ Eligible Jobs</button>
+            <button class="job-tab" data-tab="all">All Jobs</button>
+            <button class="job-tab" data-tab="applied">My Applications</button>
+            <button class="job-tab" data-tab="manage" id="manageJobsTab" style="display:none">Manage Postings</button>
+        </div>
+
+        <!-- ELIGIBLE JOBS -->
+        <div class="jobs-panel active" id="tab-eligible">
+            <div class="jobs-toolbar">
+                <input type="text" id="jobSearchInput" class="lb-search" placeholder="Search jobs by title, tech, role…"/>
+                <button class="btn-primary" id="jobSearchBtn">Search</button>
+                <button class="btn-secondary" id="jobResetBtn">All</button>
+            </div>
+            <div class="jobs-credit-notice" id="creditNotice">
+                <span>✦</span> You have <strong id="noticeCredits">—</strong> credits. Jobs below require up to this many credits.
+            </div>
+            <div class="jobs-grid" id="eligibleJobsGrid">
+                <div class="empty-state">Loading jobs…</div>
+            </div>
+            <div class="pagination" id="eligiblePagination"></div>
+        </div>
+
+        <!-- ALL JOBS -->
+        <div class="jobs-panel" id="tab-all" style="display:none">
+            <div class="jobs-toolbar">
+                <input type="text" id="allJobSearch" class="lb-search" placeholder="Search all jobs…"/>
+                <button class="btn-primary" id="allJobSearchBtn">Search</button>
+            </div>
+            <div class="jobs-grid" id="allJobsGrid">
+                <div class="empty-state">Loading…</div>
+            </div>
+            <div class="pagination" id="allJobsPagination"></div>
+        </div>
+
+        <!-- APPLICATIONS -->
+        <div class="jobs-panel" id="tab-applied" style="display:none">
+            <div class="applications-list" id="applicationsList">
+                <div class="empty-state">Loading your applications…</div>
+            </div>
+        </div>
+
+        <!-- MANAGE (company/admin) -->
+        <div class="jobs-panel" id="tab-manage" style="display:none">
+            <div class="empty-state">Select a job posting to manage applications.</div>
+        </div>
+    </div>
+</main>
+
+<!-- APPLY MODAL -->
+<div class="modal-overlay" id="applyModal" style="display:none">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="applyModalTitle">Apply for Position</h3>
+            <button class="modal-close" id="closeApplyModal">✕</button>
+        </div>
+        <div class="job-detail-banner" id="applyJobBanner"></div>
+        <form id="applyForm" class="modal-form">
+            <input type="hidden" id="applyJobId"/>
+            <div class="form-row">
+                <label>Cover Letter (optional)</label>
+                <textarea id="applyCoverLetter" rows="6" placeholder="Tell them why you're the right fit…"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelApplyModal">Cancel</button>
+                <button type="submit" class="btn-primary">Submit Application ✦</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- POST JOB MODAL -->
+<div class="modal-overlay" id="postJobModal" style="display:none">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3>Post a New Job</h3>
+            <button class="modal-close" id="closePostJobModal">✕</button>
+        </div>
+        <form id="postJobForm" class="modal-form">
+            <input type="hidden" id="postJobCompanyId"/>
+            <div class="form-row">
+                <label>Job Title *</label>
+                <input type="text" id="jobTitle" placeholder="e.g. Senior Backend Engineer" required/>
+            </div>
+            <div class="form-row">
+                <label>Description *</label>
+                <textarea id="jobDesc" rows="4" placeholder="Describe the role…" required></textarea>
+            </div>
+            <div class="form-row">
+                <label>Requirements</label>
+                <textarea id="jobRequirements" rows="3" placeholder="List requirements…"></textarea>
+            </div>
+            <div class="form-row-two">
+                <div class="form-group">
+                    <label>Salary Range</label>
+                    <input type="text" id="jobSalary" placeholder="e.g. ₹8L – ₹15L"/>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="jobLocation" placeholder="Remote / City"/>
+                </div>
+            </div>
+            <div class="form-row-two">
+                <div class="form-group">
+                    <label>Job Type</label>
+                    <select id="jobType">
+                        <option value="Full-Time">Full-Time</option>
+                        <option value="Part-Time">Part-Time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Min Credits Required</label>
+                    <input type="number" id="jobMinCredits" value="0" min="0"/>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelPostJob">Cancel</button>
+                <button type="submit" class="btn-primary">Post Job</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script src="/js/jobs.js"></script>
+</body>
+</html>

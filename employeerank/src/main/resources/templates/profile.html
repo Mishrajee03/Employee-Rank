@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EmployeeRank – Profile</title>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/profile.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Employee<strong>Rank</strong></span>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item">▦ Dashboard</a>
+        <a href="/scores" class="nav-item">◈ My Scores</a>
+        <a href="/results" class="nav-item">◉ Monthly Results</a>
+        <a href="/leaderboard" class="nav-item">◆ Leaderboard</a>
+        <a href="/jobs" class="nav-item">◎ Job Board</a>
+        <a href="/profile" class="nav-item active">◯ Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-chip-avatar" id="sidebarAvatar">?</div>
+            <div class="user-chip-info">
+                <span class="user-chip-name" id="sidebarName">Loading...</span>
+                <span class="user-chip-role" id="sidebarRole">—</span>
+            </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">↪ Logout</button>
+    </div>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div class="top-bar-title">
+            <h1>My Profile</h1>
+            <span>Manage your public presence</span>
+        </div>
+        <div class="top-bar-actions">
+            <div class="credits-badge"><span>✦</span> <span id="headerCredits">—</span> credits</div>
+        </div>
+    </header>
+
+    <div class="page active">
+        <div class="profile-layout">
+            <!-- LEFT: PROFILE CARD -->
+            <div class="profile-card-col">
+                <div class="profile-card">
+                    <div class="profile-avatar-wrap">
+                        <div class="profile-avatar" id="profileAvatar">?</div>
+                        <div class="profile-grade-badge" id="profileGradeBadge">—</div>
+                    </div>
+                    <h2 id="profileFullName">Loading…</h2>
+                    <p class="profile-title" id="profileJobTitle">—</p>
+                    <p class="profile-dept" id="profileDept">—</p>
+                    <div class="profile-credits-display">
+                        <span class="credits-icon">✦</span>
+                        <span id="profileCredits">—</span>
+                        <span>Total Credits</span>
+                    </div>
+                    <div class="profile-links" id="profileLinks"></div>
+                    <div class="profile-badge-row" id="profileBadgeRow"></div>
+                    <div class="profile-public-toggle">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="publicProfileToggle"/>
+                            <span class="toggle-track"></span>
+                            Public Profile
+                        </label>
+                    </div>
+                    <a id="publicProfileLink" href="#" target="_blank" class="public-link">View Public Profile ↗</a>
+                </div>
+            </div>
+
+            <!-- RIGHT: EDIT FORM -->
+            <div class="profile-form-col">
+                <div class="profile-section">
+                    <h3>Edit Profile</h3>
+                    <form id="profileForm">
+                        <div class="form-row-two">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="editFullName" placeholder="Jane Doe"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Job Title</label>
+                                <input type="text" id="editJobTitle" placeholder="Software Engineer"/>
+                            </div>
+                        </div>
+                        <div class="form-row-two">
+                            <div class="form-group">
+                                <label>Department</label>
+                                <input type="text" id="editDepartment" placeholder="Engineering"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="text" id="editPhone" placeholder="+91 98765 43210"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Bio</label>
+                            <textarea id="editBio" rows="3" placeholder="Tell the world about yourself…"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Skills (comma-separated)</label>
+                            <input type="text" id="editSkills" placeholder="Java, Spring Boot, React, SQL…"/>
+                        </div>
+                        <div class="form-row-two">
+                            <div class="form-group">
+                                <label>Years of Experience</label>
+                                <input type="number" id="editYOE" placeholder="3" min="0"/>
+                            </div>
+                        </div>
+                        <h4 style="margin-top:1.5rem">Social Links</h4>
+                        <div class="form-group">
+                            <label>LinkedIn URL</label>
+                            <input type="url" id="editLinkedin" placeholder="https://linkedin.com/in/…"/>
+                        </div>
+                        <div class="form-group">
+                            <label>GitHub URL</label>
+                            <input type="url" id="editGithub" placeholder="https://github.com/…"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Portfolio URL</label>
+                            <input type="url" id="editPortfolio" placeholder="https://yoursite.com"/>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PERFORMANCE HISTORY -->
+                <div class="profile-section">
+                    <h3>Performance History</h3>
+                    <div id="perfHistoryList" class="perf-history-list">
+                        <div class="empty-state">No published results yet.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script src="/js/profile.js"></script>
+</body>
+</html>

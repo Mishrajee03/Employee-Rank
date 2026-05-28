@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EmployeeRank – Dashboard</title>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/dashboard.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Employee<strong>Rank</strong></span>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item active" data-page="dashboard">
+            <span class="nav-icon">▦</span> Dashboard
+        </a>
+        <a href="/scores" class="nav-item" data-page="scores">
+            <span class="nav-icon">◈</span> My Scores
+        </a>
+        <a href="/results" class="nav-item" data-page="results">
+            <span class="nav-icon">◉</span> Monthly Results
+        </a>
+        <a href="/leaderboard" class="nav-item" data-page="leaderboard">
+            <span class="nav-icon">◆</span> Leaderboard
+        </a>
+        <a href="/jobs" class="nav-item" data-page="jobs">
+            <span class="nav-icon">◎</span> Job Board
+        </a>
+        <a href="/profile" class="nav-item" data-page="profile">
+            <span class="nav-icon">◯</span> Profile
+        </a>
+        <div class="nav-divider"></div>
+        <a href="#" class="nav-item" id="managerSection" style="display:none">
+            <span class="nav-icon">◧</span> Score Employees
+        </a>
+        <a href="/company" class="nav-item" id="companySection" style="display:none">
+            <span class="nav-icon">◫</span> My Company
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip" id="sidebarUser">
+            <div class="user-chip-avatar" id="sidebarAvatar">?</div>
+            <div class="user-chip-info">
+                <span class="user-chip-name" id="sidebarName">Loading...</span>
+                <span class="user-chip-role" id="sidebarRole">—</span>
+            </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">↪ Logout</button>
+    </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+    <header class="top-bar">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div class="top-bar-title">
+            <h1 id="pageTitle">Dashboard</h1>
+            <span id="pageSubtitle">Welcome back!</span>
+        </div>
+        <div class="top-bar-actions">
+            <div class="credits-badge" id="creditsBadge">
+                <span class="credits-icon">✦</span>
+                <span id="headerCredits">—</span> credits
+            </div>
+            <div class="notification-btn">🔔</div>
+        </div>
+    </header>
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+        <div class="stat-grid">
+            <div class="stat-card stat-primary">
+                <div class="stat-label">Total Credits</div>
+                <div class="stat-value" id="statCredits">—</div>
+                <div class="stat-sub">All-time earned</div>
+                <div class="stat-decoration">✦</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">This Month Score</div>
+                <div class="stat-value" id="statMonthScore">—%</div>
+                <div class="stat-sub" id="statMonthGrade">Grade: —</div>
+                <div class="stat-decoration">◉</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Company Rank</div>
+                <div class="stat-value" id="statRank">#—</div>
+                <div class="stat-sub">This month</div>
+                <div class="stat-decoration">◆</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Badges Earned</div>
+                <div class="stat-value" id="statBadges">—</div>
+                <div class="stat-sub">Total achievements</div>
+                <div class="stat-decoration">⬡</div>
+            </div>
+        </div>
+
+        <div class="dash-grid">
+            <section class="dash-section">
+                <div class="section-header">
+                    <h2>Recent Score Breakdown</h2>
+                    <div class="month-selector">
+                        <select id="dashMonthSel" class="select-sm"></select>
+                        <select id="dashYearSel" class="select-sm"></select>
+                        <button class="btn-sm" id="dashLoadScores">Load</button>
+                    </div>
+                </div>
+                <div id="scoreCategoryList" class="category-list">
+                    <div class="empty-state">Select a month and load scores</div>
+                </div>
+            </section>
+
+            <section class="dash-section">
+                <div class="section-header">
+                    <h2>Performance Trend</h2>
+                </div>
+                <canvas id="trendChart" height="220"></canvas>
+            </section>
+
+            <section class="dash-section full-width">
+                <div class="section-header">
+                    <h2>My Badges</h2>
+                </div>
+                <div id="badgeContainer" class="badge-grid">
+                    <div class="empty-state">No badges yet. Keep performing!</div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<!-- SCORE MODAL (manager) -->
+<div class="modal-overlay" id="scoreModal" style="display:none">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Add Employee Score</h3>
+            <button class="modal-close" id="closeScoreModal">✕</button>
+        </div>
+        <form id="scoreForm" class="modal-form">
+            <div class="form-row">
+                <label>Employee ID</label>
+                <input type="number" id="scoreEmployeeId" placeholder="Employee ID" required/>
+            </div>
+            <div class="form-row">
+                <label>Category</label>
+                <select id="scoreCategory" required>
+                    <option value="">Select category</option>
+                    <option value="PERFORMANCE">Performance</option>
+                    <option value="PUNCTUALITY">Punctuality</option>
+                    <option value="TEAMWORK">Teamwork</option>
+                    <option value="COMMUNICATION">Communication</option>
+                    <option value="LEADERSHIP">Leadership</option>
+                    <option value="INNOVATION">Innovation</option>
+                    <option value="CUSTOMER_SERVICE">Customer Service</option>
+                    <option value="TECHNICAL_SKILLS">Technical Skills</option>
+                    <option value="PROBLEM_SOLVING">Problem Solving</option>
+                    <option value="ADAPTABILITY">Adaptability</option>
+                </select>
+            </div>
+            <div class="form-row two-col">
+                <div>
+                    <label>Points (0-100)</label>
+                    <input type="number" id="scorePoints" min="0" max="100" required/>
+                </div>
+                <div>
+                    <label>Max Points</label>
+                    <input type="number" id="scoreMaxPoints" min="1" max="100" value="100" required/>
+                </div>
+            </div>
+            <div class="form-row two-col">
+                <div>
+                    <label>Month</label>
+                    <select id="scoreMonth"></select>
+                </div>
+                <div>
+                    <label>Year</label>
+                    <select id="scoreYear"></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <label>Comments</label>
+                <textarea id="scoreComments" placeholder="Feedback for employee..." rows="3"></textarea>
+            </div>
+            <div class="form-row checkbox-row">
+                <label><input type="checkbox" id="scorePeerReview"/> Peer Review</label>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelScoreModal">Cancel</button>
+                <button type="submit" class="btn-primary">Submit Score</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

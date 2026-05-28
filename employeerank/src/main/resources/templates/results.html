@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EmployeeRank – Monthly Results</title>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/leaderboard.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        .results-tabs { display:flex; gap:6px; margin-bottom:22px; flex-wrap:wrap; }
+        .results-tab {
+            padding:8px 18px; border:1px solid var(--border); border-radius:var(--radius);
+            background:none; color:var(--text-2); font-size:0.84rem; font-weight:500;
+            cursor:pointer; transition:var(--transition); font-family:var(--font-body);
+        }
+        .results-tab.active { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+        .results-panel { display:none; }
+        .results-panel.active { display:block; }
+
+        .result-card {
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg);
+            padding:22px 24px; margin-bottom:16px; display:flex; gap:20px; align-items:center;
+            transition:var(--transition);
+        }
+        .result-card:hover { border-color:var(--border-2); }
+        .result-card.unpublished { opacity:0.7; border-style:dashed; }
+        .result-main { flex:1; }
+        .result-month-label { font-family:var(--font-display); font-weight:700; font-size:1rem; color:var(--text); margin-bottom:4px; }
+        .result-score { font-size:0.85rem; color:var(--text-2); }
+        .result-bar-wrap { width:180px; }
+        .result-bar-bg { height:8px; background:var(--bg-3); border-radius:999px; overflow:hidden; margin-top:6px; }
+        .result-bar-fill { height:100%; border-radius:999px; background:var(--accent); }
+        .result-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .result-published-badge {
+            padding:4px 12px; border-radius:999px; font-size:0.72rem; font-weight:600;
+            background:rgba(34,197,94,0.1); border:1px solid var(--green); color:var(--green);
+        }
+        .result-draft-badge {
+            padding:4px 12px; border-radius:999px; font-size:0.72rem; font-weight:600;
+            background:rgba(249,115,22,0.1); border:1px solid var(--orange); color:var(--orange);
+        }
+        .result-detail-panel {
+            background:var(--bg-3); border-top:1px solid var(--border);
+            padding:16px 24px; display:none; margin-top:12px; border-radius:0 0 var(--radius-lg) var(--radius-lg);
+        }
+        .result-detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:16px; margin-bottom:12px; }
+        .detail-stat { display:flex; flex-direction:column; gap:3px; }
+        .detail-stat .label { font-size:0.72rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.05em; }
+        .detail-stat .value { font-family:var(--font-display); font-weight:700; font-size:1.1rem; color:var(--text); }
+        .manager-comment-box {
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius);
+            padding:12px 16px; font-size:0.85rem; color:var(--text-2); font-style:italic; margin-top:10px;
+        }
+
+        .admin-toolbar {
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg);
+            padding:20px 24px; margin-bottom:24px;
+            display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;
+        }
+        .admin-toolbar .form-group { margin-bottom:0; min-width:120px; }
+    </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">⬡</span><span class="logo-text">Employee<strong>Rank</strong></span></div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item">▦ Dashboard</a>
+        <a href="/scores" class="nav-item">◈ My Scores</a>
+        <a href="/results" class="nav-item active">◉ Monthly Results</a>
+        <a href="/leaderboard" class="nav-item">◆ Leaderboard</a>
+        <a href="/jobs" class="nav-item">◎ Job Board</a>
+        <a href="/profile" class="nav-item">◯ Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-chip-avatar" id="sidebarAvatar">?</div>
+            <div class="user-chip-info">
+                <span class="user-chip-name" id="sidebarName">Loading...</span>
+                <span class="user-chip-role" id="sidebarRole">—</span>
+            </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">↪ Logout</button>
+    </div>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div class="top-bar-title"><h1>Monthly Results</h1><span>Your graded report cards — month by month</span></div>
+        <div class="top-bar-actions">
+            <div class="credits-badge"><span>✦</span> <span id="headerCredits">—</span> credits</div>
+        </div>
+    </header>
+
+    <div class="page active">
+        <div class="results-tabs">
+            <button class="results-tab active" data-tab="my">📋 My Results</button>
+            <button class="results-tab" data-tab="admin" id="adminTab" style="display:none">⚙ Admin Panel</button>
+        </div>
+
+        <!-- MY RESULTS -->
+        <div class="results-panel active" id="tab-my">
+            <div id="myResultsList">
+                <div class="empty-state">Loading your results…</div>
+            </div>
+        </div>
+
+        <!-- ADMIN PANEL -->
+        <div class="results-panel" id="tab-admin" style="display:none">
+            <div class="admin-toolbar">
+                <div class="form-group">
+                    <label>Employee ID</label>
+                    <input type="number" id="adminEmpId" placeholder="User ID"/>
+                </div>
+                <div class="form-group">
+                    <label>Month</label>
+                    <select id="adminMonth"></select>
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <select id="adminYear"></select>
+                </div>
+                <button class="btn-primary" id="generateBtn">Generate Result</button>
+                <button class="btn-secondary" id="processAllBtn">Process All (Month)</button>
+            </div>
+
+            <div id="adminResultsList">
+                <div class="empty-state">Use the form above to generate or load results.</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    Auth.requireAuth();
+    initSidebar();
+    const user = Auth.getUser();
+
+    populateMonthYear('adminMonth', 'adminYear');
+    api.getMe().then(r => { document.getElementById('headerCredits').textContent = r.data?.totalCredits ?? 0; });
+
+    // Show admin tab for managers/admins
+    if (user?.role !== 'ROLE_EMPLOYEE') {
+        document.getElementById('adminTab').style.display = 'block';
+    }
+
+    // Tab switching
+    document.querySelectorAll('.results-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.results-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.results-panel').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+            tab.classList.add('active');
+            const panel = document.getElementById(`tab-${tab.dataset.tab}`);
+            if (panel) { panel.classList.add('active'); panel.style.display = 'block'; }
+        });
+    });
+
+    // ---- MY RESULTS ----
+    async function loadMyResults() {
+        const container = document.getElementById('myResultsList');
+        container.innerHTML = '<div class="empty-state">Loading…</div>';
+        try {
+            const res = await api.getMyResults();
+            const results = res.data || [];
+            if (!results.length) {
+                container.innerHTML = '<div class="empty-state">No results yet. Results are generated at end of each month.</div>';
+                return;
+            }
+            container.innerHTML = results.map(r => renderResultCard(r, false)).join('');
+            // Attach expand toggles
+            container.querySelectorAll('.expand-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const detail = btn.closest('.result-card-wrapper').querySelector('.result-detail-panel');
+                    const isOpen = detail.style.display === 'block';
+                    detail.style.display = isOpen ? 'none' : 'block';
+                    btn.textContent = isOpen ? 'Details ▾' : 'Close ▴';
+                });
+            });
+        } catch (err) {
+            container.innerHTML = `<div class="empty-state">${err.message}</div>`;
+        }
+    }
+
+    function renderResultCard(r, isAdmin) {
+        const pct = r.percentageScore ?? 0;
+        const barColor = pct >= 90 ? '#e8ff47' : pct >= 75 ? '#22c55e' : pct >= 60 ? '#3b82f6' : pct >= 45 ? '#f97316' : '#ef4444';
+        return `
+        <div class="result-card-wrapper">
+            <div class="result-card ${!r.isPublished ? 'unpublished' : ''}">
+                <div class="result-main">
+                    <div class="result-month-label">${formatMonth(r.resultMonth, r.resultYear)}</div>
+                    <div class="result-score">${r.employeeName ? r.employeeName + ' · ' : ''}Score: <strong style="color:var(--accent)">${pct.toFixed(1)}%</strong></div>
+                    <div class="result-bar-wrap">
+                        <div class="result-bar-bg"><div class="result-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+                    </div>
+                </div>
+                <div style="text-align:center;min-width:60px">
+                    <div class="grade-pill ${gradeClass(r.grade)}" style="margin:0 auto">${r.grade ?? '—'}</div>
+                    <div style="font-size:0.72rem;color:var(--text-3);margin-top:4px">Grade</div>
+                </div>
+                <div style="text-align:center;min-width:60px">
+                    <div style="font-family:var(--font-display);font-weight:800;font-size:1.2rem;color:var(--accent)">
+                        ${r.rankInCompany ? '#' + r.rankInCompany : '—'}
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--text-3)">Rank</div>
+                </div>
+                <div style="text-align:center;min-width:70px">
+                    <div style="font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:var(--green)">+${r.creditsEarned ?? 0}</div>
+                    <div style="font-size:0.72rem;color:var(--text-3)">Credits</div>
+                </div>
+                <div class="result-actions">
+                    ${r.isPublished
+                        ? '<span class="result-published-badge">✓ Published</span>'
+                        : '<span class="result-draft-badge">◌ Draft</span>'}
+                    <button class="btn-secondary expand-btn" style="font-size:0.78rem;padding:6px 12px">Details ▾</button>
+                    ${isAdmin && !r.isPublished ? `<button class="btn-primary publish-btn" data-id="${r.id}" style="font-size:0.78rem;padding:6px 12px">Publish</button>` : ''}
+                </div>
+            </div>
+            <div class="result-detail-panel">
+                <div class="result-detail-grid">
+                    <div class="detail-stat"><span class="label">Total Score</span><span class="value">${r.totalScore?.toFixed(1) ?? '—'} / ${r.maxPossibleScore?.toFixed(0) ?? '—'}</span></div>
+                    <div class="detail-stat"><span class="label">Performance</span><span class="value" style="font-size:0.88rem">${r.performanceCategory ?? '—'}</span></div>
+                    <div class="detail-stat"><span class="label">Dept. Rank</span><span class="value">${r.rankInDepartment ? '#' + r.rankInDepartment : '—'}</span></div>
+                    <div class="detail-stat"><span class="label">Credits Earned</span><span class="value" style="color:var(--accent)">✦ ${r.creditsEarned ?? 0}</span></div>
+                </div>
+                ${r.managerComments ? `<div class="manager-comment-box">💬 "${r.managerComments}"</div>` : ''}
+            </div>
+        </div>`;
+    }
+
+    // ---- ADMIN PANEL ----
+    document.getElementById('generateBtn')?.addEventListener('click', async () => {
+        const empId = parseInt(document.getElementById('adminEmpId').value);
+        const month = parseInt(document.getElementById('adminMonth').value);
+        const year  = parseInt(document.getElementById('adminYear').value);
+        if (!empId) { showToast('Enter an employee ID', 'error'); return; }
+        try {
+            const res = await api.generateResult(empId, month, year);
+            showToast('Result generated!', 'success');
+            renderAdminResults([res.data]);
+        } catch (err) { showToast(err.message, 'error'); }
+    });
+
+    document.getElementById('processAllBtn')?.addEventListener('click', async () => {
+        const month = parseInt(document.getElementById('adminMonth').value);
+        const year  = parseInt(document.getElementById('adminYear').value);
+        if (!confirm(`Process results for ALL employees for ${formatMonth(month, year)}? This cannot be undone.`)) return;
+        try {
+            await api.processResults(month, year);
+            showToast(`Results processed for ${formatMonth(month, year)}!`, 'success');
+        } catch (err) { showToast(err.message, 'error'); }
+    });
+
+    function renderAdminResults(results) {
+        const container = document.getElementById('adminResultsList');
+        container.innerHTML = results.map(r => renderResultCard(r, true)).join('');
+        container.querySelectorAll('.expand-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const detail = btn.closest('.result-card-wrapper').querySelector('.result-detail-panel');
+                const isOpen = detail.style.display === 'block';
+                detail.style.display = isOpen ? 'none' : 'block';
+                btn.textContent = isOpen ? 'Details ▾' : 'Close ▴';
+            });
+        });
+        container.querySelectorAll('.publish-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const comment = prompt('Add manager comment (optional):');
+                try {
+                    await api.publishResult(btn.dataset.id, { managerComments: comment || '' });
+                    showToast('Result published!', 'success');
+                    btn.closest('.result-card').querySelector('.result-draft-badge').outerHTML = '<span class="result-published-badge">✓ Published</span>';
+                    btn.remove();
+                } catch (err) { showToast(err.message, 'error'); }
+            });
+        });
+    }
+
+    loadMyResults();
+});
+</script>
+</body>
+</html>

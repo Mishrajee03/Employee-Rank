@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EmployeeRank – My Scores</title>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        .scores-toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:22px; }
+        .score-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+        .score-card {
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg);
+            padding:18px 20px; display:flex; flex-direction:column; gap:10px;
+        }
+        .score-card-header { display:flex; align-items:center; justify-content:space-between; }
+        .score-cat-badge {
+            padding:3px 12px; border-radius:999px; font-size:0.72rem; font-weight:600;
+            text-transform:uppercase; letter-spacing:0.04em;
+            background:var(--accent-glow); border:1px solid rgba(232,255,71,0.2); color:var(--accent);
+        }
+        .score-peer { background:rgba(59,130,246,0.1); border-color:var(--blue); color:var(--blue); }
+        .score-points { font-family:var(--font-display); font-size:1.4rem; font-weight:800; color:var(--text); }
+        .score-bar-wrap { height:6px; background:var(--bg-3); border-radius:999px; overflow:hidden; }
+        .score-bar { height:100%; border-radius:999px; background:var(--accent); }
+        .score-meta { display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-3); }
+        .score-comment { font-size:0.82rem; color:var(--text-2); font-style:italic; border-left:2px solid var(--border); padding-left:10px; }
+
+        .summary-card {
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg);
+            padding:24px; margin-bottom:24px;
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:20px;
+            align-items:center;
+        }
+        .summary-item { text-align:center; }
+        .summary-item .value { font-family:var(--font-display); font-size:1.8rem; font-weight:800; color:var(--accent); }
+        .summary-item .label { font-size:0.75rem; color:var(--text-3); margin-top:4px; }
+
+        .manager-section { margin-top:32px; }
+        .manager-section h3 { font-family:var(--font-display); font-size:1rem; font-weight:700; margin-bottom:16px; }
+        .emp-score-form { background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; }
+    </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">⬡</span><span class="logo-text">Employee<strong>Rank</strong></span></div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item">▦ Dashboard</a>
+        <a href="/scores" class="nav-item active">◈ My Scores</a>
+        <a href="/results" class="nav-item">◉ Monthly Results</a>
+        <a href="/leaderboard" class="nav-item">◆ Leaderboard</a>
+        <a href="/jobs" class="nav-item">◎ Job Board</a>
+        <a href="/profile" class="nav-item">◯ Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-chip-avatar" id="sidebarAvatar">?</div>
+            <div class="user-chip-info">
+                <span class="user-chip-name" id="sidebarName">Loading...</span>
+                <span class="user-chip-role" id="sidebarRole">—</span>
+            </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">↪ Logout</button>
+    </div>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div class="top-bar-title"><h1>My Scores</h1><span>Track your performance by category</span></div>
+        <div class="top-bar-actions">
+            <div class="credits-badge"><span>✦</span> <span id="headerCredits">—</span> credits</div>
+        </div>
+    </header>
+
+    <div class="page active" id="mainPage">
+        <div class="scores-toolbar">
+            <select id="monthSel" class="select-sm"></select>
+            <select id="yearSel" class="select-sm"></select>
+            <button class="btn-primary" id="loadBtn">Load Scores</button>
+            <button class="btn-secondary" id="loadAllBtn">All Scores</button>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-card" id="summaryCard" style="display:none">
+            <div class="summary-item">
+                <div class="value" id="sumPct">—</div>
+                <div class="label">Overall Score</div>
+            </div>
+            <div class="summary-item">
+                <div class="value" id="sumGrade">—</div>
+                <div class="label">Grade</div>
+            </div>
+            <div class="summary-item">
+                <div class="value" id="sumCount">—</div>
+                <div class="label">Evaluations</div>
+            </div>
+            <div class="summary-item">
+                <div class="value" id="sumCredits">—</div>
+                <div class="label">Credits Earned</div>
+            </div>
+            <div class="summary-item">
+                <div class="value" id="sumPerf">—</div>
+                <div class="label">Performance</div>
+            </div>
+        </div>
+
+        <!-- SCORE CARDS -->
+        <div class="score-cards" id="scoreCards">
+            <div class="empty-state">Select a month and click Load Scores.</div>
+        </div>
+
+        <!-- MANAGER: ADD SCORE SECTION -->
+        <div class="manager-section" id="managerSection" style="display:none">
+            <h3>◈ Score an Employee</h3>
+            <div class="emp-score-form">
+                <form id="addScoreForm">
+                    <div class="form-row-two">
+                        <div class="form-group">
+                            <label>Employee ID</label>
+                            <input type="number" id="empIdInput" placeholder="Employee's user ID" required/>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="catInput" required>
+                                <option value="">Select…</option>
+                                <option value="PERFORMANCE">Performance</option>
+                                <option value="PUNCTUALITY">Punctuality</option>
+                                <option value="TEAMWORK">Teamwork</option>
+                                <option value="COMMUNICATION">Communication</option>
+                                <option value="LEADERSHIP">Leadership</option>
+                                <option value="INNOVATION">Innovation</option>
+                                <option value="CUSTOMER_SERVICE">Customer Service</option>
+                                <option value="TECHNICAL_SKILLS">Technical Skills</option>
+                                <option value="PROBLEM_SOLVING">Problem Solving</option>
+                                <option value="ADAPTABILITY">Adaptability</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-two">
+                        <div class="form-group two-col">
+                            <div>
+                                <label>Points</label>
+                                <input type="number" id="ptsInput" min="0" max="100" required/>
+                            </div>
+                            <div>
+                                <label>Max Points</label>
+                                <input type="number" id="maxPtsInput" value="100" min="1" max="100" required/>
+                            </div>
+                        </div>
+                        <div class="form-group two-col">
+                            <div>
+                                <label>Month</label>
+                                <select id="scMonth"></select>
+                            </div>
+                            <div>
+                                <label>Year</label>
+                                <select id="scYear"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>Comments</label>
+                        <textarea id="commentsInput" rows="2" placeholder="Feedback…"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label style="display:flex;align-items:center;gap:8px;color:var(--text-2)">
+                            <input type="checkbox" id="peerCheck"/> Peer Review
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Submit Score</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    Auth.requireAuth();
+    initSidebar();
+    const user = Auth.getUser();
+    populateMonthYear('monthSel', 'yearSel');
+    populateMonthYear('scMonth', 'scYear');
+
+    api.getMe().then(r => { document.getElementById('headerCredits').textContent = r.data?.totalCredits ?? 0; });
+
+    if (user?.role !== 'ROLE_EMPLOYEE') {
+        document.getElementById('managerSection').style.display = 'block';
+    }
+
+    async function loadScores(month, year) {
+        const cards = document.getElementById('scoreCards');
+        cards.innerHTML = '<div class="empty-state">Loading…</div>';
+        try {
+            const [scoresRes, summaryRes] = await Promise.all([
+                api.getMyScores(month, year),
+                month ? api.getMySummary(month, year) : Promise.resolve(null)
+            ]);
+            const scores = scoresRes.data || [];
+            if (summaryRes) renderSummary(summaryRes.data);
+            renderScoreCards(scores);
+        } catch (err) {
+            cards.innerHTML = `<div class="empty-state">${err.message}</div>`;
+        }
+    }
+
+    function renderSummary(s) {
+        if (!s) return;
+        document.getElementById('summaryCard').style.display = 'grid';
+        document.getElementById('sumPct').textContent    = `${s.percentage?.toFixed(1) ?? 0}%`;
+        document.getElementById('sumGrade').textContent  = s.grade ?? '—';
+        document.getElementById('sumCount').textContent  = s.categoryBreakdown?.reduce((a, c) => a + c.scoreCount, 0) ?? 0;
+        document.getElementById('sumCredits').textContent = computeCredits(s.percentage);
+        document.getElementById('sumPerf').textContent   = getPerf(s.percentage);
+    }
+
+    function computeCredits(pct) {
+        if (!pct) return 0;
+        if (pct >= 95) return 100; if (pct >= 90) return 90; if (pct >= 85) return 80;
+        if (pct >= 80) return 70; if (pct >= 75) return 60; if (pct >= 70) return 50;
+        if (pct >= 60) return 35; if (pct >= 50) return 20; return 10;
+    }
+    function getPerf(pct) {
+        if (!pct) return '—';
+        if (pct >= 90) return 'Outstanding'; if (pct >= 80) return 'Exceeds';
+        if (pct >= 70) return 'Meets'; if (pct >= 60) return 'Needs Work'; return 'Unsatisfactory';
+    }
+
+    function renderScoreCards(scores) {
+        const cards = document.getElementById('scoreCards');
+        if (!scores.length) { cards.innerHTML = '<div class="empty-state">No scores found for this period.</div>'; return; }
+        cards.innerHTML = scores.map(s => {
+            const pct = s.percentage ?? 0;
+            let barColor = '#ef4444';
+            if (pct >= 90) barColor = '#e8ff47'; else if (pct >= 75) barColor = '#22c55e'; else if (pct >= 60) barColor = '#3b82f6'; else if (pct >= 45) barColor = '#f97316';
+            return `
+            <div class="score-card">
+                <div class="score-card-header">
+                    <span class="score-cat-badge ${s.isPeerReview ? 'score-peer' : ''}">${s.category?.replace(/_/g,' ') ?? '—'}</span>
+                    <span style="font-size:0.75rem;color:var(--text-3)">${formatMonth(s.scoreMonth, s.scoreYear)}</span>
+                </div>
+                <div class="score-points">${s.points}<span style="font-size:1rem;color:var(--text-3)">/${s.maxPoints}</span></div>
+                <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%;background:${barColor}"></div></div>
+                <div class="score-meta">
+                    <span>By: ${s.scoredByName || '—'}</span>
+                    <span>${pct.toFixed(1)}%</span>
+                    <span>${s.isPeerReview ? 'Peer Review' : 'Manager'}</span>
+                </div>
+                ${s.comments ? `<div class="score-comment">"${s.comments}"</div>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    document.getElementById('loadBtn')?.addEventListener('click', () => {
+        const m = parseInt(document.getElementById('monthSel').value);
+        const y = parseInt(document.getElementById('yearSel').value);
+        loadScores(m, y);
+    });
+    document.getElementById('loadAllBtn')?.addEventListener('click', () => {
+        document.getElementById('summaryCard').style.display = 'none';
+        loadScores(null, null);
+    });
+
+    document.getElementById('addScoreForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            await api.addScore({
+                employeeId:   parseInt(document.getElementById('empIdInput').value),
+                category:     document.getElementById('catInput').value,
+                points:       parseInt(document.getElementById('ptsInput').value),
+                maxPoints:    parseInt(document.getElementById('maxPtsInput').value),
+                comments:     document.getElementById('commentsInput').value,
+                scoreMonth:   parseInt(document.getElementById('scMonth').value),
+                scoreYear:    parseInt(document.getElementById('scYear').value),
+                isPeerReview: document.getElementById('peerCheck').checked
+            });
+            showToast('Score submitted!', 'success');
+            e.target.reset();
+            document.getElementById('maxPtsInput').value = '100';
+        } catch (err) { showToast(err.message, 'error'); }
+    });
+
+    // Auto-load current month
+    const now = new Date();
+    loadScores(now.getMonth() + 1, now.getFullYear());
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EmployeeRank – Leaderboard</title>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/leaderboard.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Employee<strong>Rank</strong></span>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item">▦ Dashboard</a>
+        <a href="/scores" class="nav-item">◈ My Scores</a>
+        <a href="/results" class="nav-item">◉ Monthly Results</a>
+        <a href="/leaderboard" class="nav-item active">◆ Leaderboard</a>
+        <a href="/jobs" class="nav-item">◎ Job Board</a>
+        <a href="/profile" class="nav-item">◯ Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-chip-avatar" id="sidebarAvatar">?</div>
+            <div class="user-chip-info">
+                <span class="user-chip-name" id="sidebarName">Loading...</span>
+                <span class="user-chip-role" id="sidebarRole">—</span>
+            </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">↪ Logout</button>
+    </div>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div class="top-bar-title">
+            <h1>Leaderboard</h1>
+            <span>Top performers across the platform</span>
+        </div>
+        <div class="top-bar-actions">
+            <div class="credits-badge" id="creditsBadge">
+                <span>✦</span> <span id="headerCredits">—</span> credits
+            </div>
+        </div>
+    </header>
+
+    <div class="page active">
+        <!-- TABS -->
+        <div class="lb-tabs">
+            <button class="lb-tab active" data-tab="global">🌍 Global Leaderboard</button>
+            <button class="lb-tab" data-tab="monthly">📅 Monthly Result</button>
+            <button class="lb-tab" data-tab="company">🏢 Company Board</button>
+        </div>
+
+        <!-- GLOBAL LEADERBOARD -->
+        <div class="lb-panel active" id="tab-global">
+            <div class="lb-toolbar">
+                <input type="text" id="lbSearchInput" class="lb-search" placeholder="Search by name, skill, or title…"/>
+                <button class="btn-primary" id="lbSearchBtn">Search</button>
+                <button class="btn-secondary" id="lbResetBtn">Reset</button>
+            </div>
+            <!-- TOP 3 PODIUM -->
+            <div class="podium" id="podiumContainer"></div>
+            <!-- REST OF LEADERBOARD -->
+            <div class="lb-table-wrap">
+                <table class="lb-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Employee</th>
+                            <th>Company</th>
+                            <th>Job Title</th>
+                            <th>Credits</th>
+                            <th>Badges</th>
+                            <th>Profile</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lbTableBody">
+                        <tr><td colspan="7" class="empty-state">Loading leaderboard…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="lbPagination"></div>
+        </div>
+
+        <!-- MONTHLY RESULT TAB -->
+        <div class="lb-panel" id="tab-monthly" style="display:none">
+            <div class="lb-toolbar">
+                <label>Company ID</label>
+                <input type="number" id="monthlyCompanyId" class="input-sm" placeholder="Company ID"/>
+                <label>Month</label>
+                <select id="monthlyMonth" class="select-sm"></select>
+                <label>Year</label>
+                <select id="monthlyYear" class="select-sm"></select>
+                <button class="btn-primary" id="loadMonthlyBtn">Load Results</button>
+            </div>
+            <div id="monthlyLeaderboardContainer">
+                <div class="empty-state">Enter company ID and select a month to view results.</div>
+            </div>
+        </div>
+
+        <!-- COMPANY TAB -->
+        <div class="lb-panel" id="tab-company" style="display:none">
+            <div class="lb-toolbar">
+                <input type="text" id="companySearchInput" class="lb-search" placeholder="Search companies…"/>
+                <button class="btn-primary" id="companySearchBtn">Search</button>
+            </div>
+            <div class="company-grid" id="companyGrid">
+                <div class="empty-state">Loading companies…</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script src="/js/leaderboard.js"></script>
+</body>
+</html>

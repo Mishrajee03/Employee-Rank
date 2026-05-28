@@ -1,0 +1,106 @@
+/* ======= LEADERBOARD ======= */
+.lb-tabs { display: flex; gap: 6px; margin-bottom: 24px; }
+.lb-tab {
+    padding: 9px 20px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: none; color: var(--text-2); font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; transition: var(--transition); font-family: var(--font-body);
+}
+.lb-tab.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+.lb-panel { display: none; }
+.lb-panel.active { display: block; }
+.lb-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+.lb-search { flex: 1; min-width: 200px; }
+
+/* PODIUM */
+.podium {
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: 12px; margin-bottom: 32px; padding: 0 20px;
+}
+.podium-item {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    flex: 1; max-width: 200px;
+}
+.podium-avatar-wrap { position: relative; }
+.podium-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--bg-3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 700; font-size: 1.3rem;
+    border: 3px solid var(--border);
+    color: var(--text);
+    overflow: hidden;
+}
+.podium-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.podium-rank-badge {
+    position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+    font-size: 1.2rem; line-height: 1;
+}
+.podium-name { font-family: var(--font-display); font-weight: 700; font-size: 0.88rem; text-align: center; color: var(--text); }
+.podium-credits { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+.podium-block {
+    width: 100%; border-radius: var(--radius) var(--radius) 0 0;
+    border-top: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--text-3);
+}
+.podium-item:nth-child(1) .podium-block { height: 120px; background: linear-gradient(to top, rgba(232,255,71,0.1), transparent); border-color: var(--accent); }
+.podium-item:nth-child(2) .podium-block { height: 80px; background: linear-gradient(to top, rgba(148,163,184,0.08), transparent); border-color: #94a3b8; }
+.podium-item:nth-child(3) .podium-block { height: 60px; background: linear-gradient(to top, rgba(180,83,9,0.08), transparent); border-color: #b45309; }
+
+/* LB TABLE */
+.lb-table-wrap { overflow-x: auto; }
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th {
+    text-align: left; padding: 10px 14px;
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-3); border-bottom: 1px solid var(--border);
+    font-weight: 500; background: var(--bg-2);
+}
+.lb-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.lb-table tr:hover td { background: var(--bg-3); }
+.rank-num { font-family: var(--font-display); font-weight: 800; color: var(--text-2); }
+.rank-1 { color: var(--accent); }
+.rank-2 { color: #94a3b8; }
+.rank-3 { color: #b45309; }
+.user-cell { display: flex; align-items: center; gap: 10px; }
+.user-cell-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--bg-3); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; color: var(--accent);
+    overflow: hidden; flex-shrink: 0;
+}
+.user-cell-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-cell-info { display: flex; flex-direction: column; gap: 2px; }
+.user-cell-name { font-weight: 600; color: var(--text); }
+.user-cell-sub { font-size: 0.72rem; color: var(--text-3); }
+.credits-num { font-family: var(--font-display); font-weight: 700; color: var(--accent); }
+
+/* COMPANY GRID */
+.company-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.company-card {
+    background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 20px; transition: var(--transition);
+}
+.company-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+.company-name { font-family: var(--font-display); font-weight: 700; margin-bottom: 6px; }
+.company-industry { font-size: 0.78rem; color: var(--text-3); margin-bottom: 10px; }
+.company-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.company-tag {
+    padding: 3px 10px; border-radius: 999px; font-size: 0.72rem;
+    border: 1px solid var(--border); color: var(--text-2);
+}
+.company-tag.hiring { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.08); }
+.company-tag.verified { border-color: var(--blue); color: var(--blue); background: rgba(59,130,246,0.08); }
+
+/* MONTHLY RESULT TABLE */
+.monthly-result-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.monthly-result-table th { text-align: left; padding: 10px 14px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); border-bottom: 1px solid var(--border); }
+.monthly-result-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.monthly-result-table tr:hover td { background: var(--bg-3); }
+.perf-badge { padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 500; }
+.perf-outstanding { background: rgba(232,255,71,0.1); color: var(--accent); border: 1px solid rgba(232,255,71,0.25); }
+.perf-exceeds { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+.perf-meets { background: rgba(59,130,246,0.1); color: var(--blue); border: 1px solid rgba(59,130,246,0.2); }
+.perf-needs { background: rgba(249,115,22,0.1); color: var(--orange); border: 1px solid rgba(249,115,22,0.2); }
+.perf-unsatisfactory { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EmployeeRank – My Company</title>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="/css/leaderboard.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        .company-layout { display:grid; grid-template-columns:320px 1fr; gap:24px; align-items:start; }
+        .company-info-card {
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-xl);
+            padding:28px 24px; display:flex; flex-direction:column; gap:14px;
+            position:sticky; top:80px;
+        }
+        .company-logo-big {
+            width:72px; height:72px; border-radius:var(--radius-lg);
+            background:var(--bg-3); border:2px solid var(--border);
+            display:flex; align-items:center; justify-content:center;
+            font-size:2rem; margin-bottom:4px;
+        }
+        .company-info-name { font-family:var(--font-display); font-size:1.3rem; font-weight:800; }
+        .company-info-meta { font-size:0.82rem; color:var(--text-2); }
+        .company-status-row { display:flex; gap:8px; flex-wrap:wrap; }
+        .company-stat-row { display:flex; gap:16px; flex-wrap:wrap; }
+        .cstat { display:flex; flex-direction:column; gap:2px; }
+        .cstat .v { font-family:var(--font-display); font-weight:800; font-size:1.3rem; color:var(--accent); }
+        .cstat .l { font-size:0.72rem; color:var(--text-3); }
+        .edit-toggle-btn { margin-top:4px; }
+        .edit-company-form { display:none; }
+        .edit-company-form.open { display:flex; flex-direction:column; gap:14px; }
+
+        .company-right { display:flex; flex-direction:column; gap:20px; }
+        .comp-section { background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:22px; }
+        .comp-section h3 { font-family:var(--font-display); font-size:1rem; font-weight:700; margin-bottom:16px; }
+
+        .emp-table { width:100%; border-collapse:collapse; }
+        .emp-table th { text-align:left; padding:9px 12px; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-3); border-bottom:1px solid var(--border); }
+        .emp-table td { padding:11px 12px; border-bottom:1px solid var(--border); font-size:0.85rem; }
+        .emp-table tr:last-child td { border-bottom:none; }
+        .emp-table tr:hover td { background:var(--bg-3); }
+
+        .hiring-toggle { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+        .hiring-toggle label { font-size:0.85rem; color:var(--text-2); display:flex; align-items:center; gap:10px; cursor:pointer; }
+        .hiring-toggle input { display:none; }
+
+        .no-company-state {
+            text-align:center; padding:80px 24px;
+            background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-xl);
+        }
+        .no-company-state h2 { font-family:var(--font-display); font-size:1.4rem; margin-bottom:10px; }
+        .no-company-state p { color:var(--text-2); margin-bottom:24px; }
+
+        .create-company-form { max-width:520px; margin:0 auto; text-align:left; }
+        .create-company-form .form-group { margin-bottom:14px; }
+
+        @media(max-width:1024px){ .company-layout{grid-template-columns:1fr;} .company-info-card{position:static;} }
+    </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">⬡</span><span class="logo-text">Employee<strong>Rank</strong></span></div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item">▦ Dashboard</a>
+        <a href="/scores" class="nav-item">◈ My Scores</a>
+        <a href="/results" class="nav-item">◉ Monthly Results</a>
+        <a href="/leaderboard" class="nav-item">◆ Leaderboard</a>
+        <a href="/jobs" class="nav-item">◎ Job Board</a>
+        <a href="/profile" class="nav-item">◯ Profile</a>
+        <a href="/company" class="nav-item active">◫ My Company</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-chip-avatar" id="sidebarAvatar">?</div>
+            <div class="user-chip-info">
+                <span class="user-chip-name" id="sidebarName">Loading...</span>
+                <span class="user-chip-role" id="sidebarRole">—</span>
+            </div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">↪ Logout</button>
+    </div>
+</aside>
+
+<main class="main-content">
+    <header class="top-bar">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div class="top-bar-title"><h1>My Company</h1><span>Manage your organisation on EmployeeRank</span></div>
+        <div class="top-bar-actions">
+            <div class="credits-badge"><span>✦</span> <span id="headerCredits">—</span> credits</div>
+        </div>
+    </header>
+
+    <div class="page active" id="mainPage">
+        <div class="empty-state" id="loadingState">Loading…</div>
+
+        <!-- NO COMPANY -->
+        <div id="noCompanyState" style="display:none">
+            <div class="no-company-state">
+                <div style="font-size:3rem;margin-bottom:16px">🏢</div>
+                <h2>Create Your Company Profile</h2>
+                <p>Register your company on EmployeeRank to manage employees, post jobs, and hire by credits.</p>
+                <form class="create-company-form" id="createCompanyForm">
+                    <div class="form-group"><label>Company Name *</label><input type="text" id="cName" placeholder="Acme Corp" required/></div>
+                    <div class="form-group"><label>Description</label><textarea id="cDesc" rows="3" placeholder="What does your company do?"></textarea></div>
+                    <div class="form-row-two">
+                        <div class="form-group"><label>Industry</label><input type="text" id="cIndustry" placeholder="Technology"/></div>
+                        <div class="form-group"><label>Location</label><input type="text" id="cLocation" placeholder="Bangalore, India"/></div>
+                    </div>
+                    <div class="form-row-two">
+                        <div class="form-group"><label>Company Size</label>
+                            <select id="cSize">
+                                <option value="">Select size</option>
+                                <option value="1-10">1–10</option><option value="11-50">11–50</option>
+                                <option value="51-200">51–200</option><option value="201-500">201–500</option>
+                                <option value="500+">500+</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Min Credits to Apply</label><input type="number" id="cMinCredits" value="0" min="0"/></div>
+                    </div>
+                    <div class="form-group"><label>Website URL</label><input type="url" id="cWebsite" placeholder="https://acmecorp.com"/></div>
+                    <div class="form-actions"><button type="submit" class="btn-primary">Create Company</button></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- HAS COMPANY -->
+        <div id="companyState" style="display:none">
+            <div class="company-layout">
+                <!-- LEFT CARD -->
+                <div class="company-info-card">
+                    <div class="company-logo-big" id="cLogo">🏢</div>
+                    <div class="company-info-name" id="cDisplayName">—</div>
+                    <div class="company-info-meta" id="cDisplayIndustry">—</div>
+                    <div class="company-info-meta" id="cDisplayLocation">—</div>
+                    <div class="company-status-row">
+                        <span id="cVerifiedBadge" class="company-tag verified" style="display:none">✓ Verified</span>
+                        <span id="cHiringBadge" class="company-tag hiring" style="display:none">🟢 Hiring</span>
+                    </div>
+                    <div class="company-stat-row">
+                        <div class="cstat"><span class="v" id="cEmpCount">—</span><span class="l">Employees</span></div>
+                        <div class="cstat"><span class="v" id="cMinCred">—</span><span class="l">Min Credits</span></div>
+                    </div>
+
+                    <div class="hiring-toggle">
+                        <label>
+                            <input type="checkbox" id="hiringToggle"/>
+                            <span class="toggle-track"></span>
+                            Currently Hiring
+                        </label>
+                    </div>
+
+                    <button class="btn-secondary edit-toggle-btn" id="editToggleBtn">✎ Edit Company Info</button>
+
+                    <!-- INLINE EDIT FORM -->
+                    <form class="edit-company-form" id="editCompanyForm">
+                        <div class="form-group"><label>Description</label><textarea id="eDesc" rows="3"></textarea></div>
+                        <div class="form-group"><label>Industry</label><input type="text" id="eIndustry"/></div>
+                        <div class="form-group"><label>Location</label><input type="text" id="eLocation"/></div>
+                        <div class="form-group"><label>Website</label><input type="url" id="eWebsite"/></div>
+                        <div class="form-group"><label>Company Size</label>
+                            <select id="eSize">
+                                <option value="1-10">1–10</option><option value="11-50">11–50</option>
+                                <option value="51-200">51–200</option><option value="201-500">201–500</option>
+                                <option value="500+">500+</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Min Credits Required</label><input type="number" id="eMinCredits" min="0"/></div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" id="cancelEdit">Cancel</button>
+                            <button type="submit" class="btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- RIGHT PANELS -->
+                <div class="company-right">
+                    <!-- EMPLOYEE LEADERBOARD -->
+                    <div class="comp-section">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                            <h3>Employee Leaderboard</h3>
+                            <div style="display:flex;gap:8px">
+                                <select id="lbMonth" class="select-sm"></select>
+                                <select id="lbYear" class="select-sm"></select>
+                                <button class="btn-sm" id="loadLbBtn">Load</button>
+                            </div>
+                        </div>
+                        <div id="companyLbContainer">
+                            <div class="empty-state">Select a month to view rankings.</div>
+                        </div>
+                    </div>
+
+                    <!-- ALL EMPLOYEES -->
+                    <div class="comp-section">
+                        <h3>All Employees</h3>
+                        <div style="overflow-x:auto">
+                            <table class="emp-table">
+                                <thead>
+                                    <tr><th>#</th><th>Name</th><th>Role</th><th>Department</th><th>Credits</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="empTableBody">
+                                    <tr><td colspan="6" class="empty-state">Loading employees…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- JOB POSTINGS -->
+                    <div class="comp-section">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                            <h3>Job Postings</h3>
+                            <button class="btn-primary" id="newJobBtn">+ New Job</button>
+                        </div>
+                        <div id="companyJobsList">
+                            <div class="empty-state">No job postings yet.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- NEW JOB MODAL -->
+<div class="modal-overlay" id="newJobModal" style="display:none">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3>Post a New Job</h3>
+            <button class="modal-close" id="closeNewJobModal">✕</button>
+        </div>
+        <form id="newJobForm" class="modal-form">
+            <div class="form-row"><label>Job Title *</label><input type="text" id="njTitle" required/></div>
+            <div class="form-row"><label>Description *</label><textarea id="njDesc" rows="4" required></textarea></div>
+            <div class="form-row"><label>Requirements</label><textarea id="njReq" rows="3"></textarea></div>
+            <div class="form-row-two">
+                <div class="form-group"><label>Salary Range</label><input type="text" id="njSalary" placeholder="₹8L – ₹15L"/></div>
+                <div class="form-group"><label>Location</label><input type="text" id="njLocation" placeholder="Remote / City"/></div>
+            </div>
+            <div class="form-row-two">
+                <div class="form-group"><label>Job Type</label>
+                    <select id="njType">
+                        <option>Full-Time</option><option>Part-Time</option>
+                        <option>Contract</option><option>Internship</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Min Credits Required</label><input type="number" id="njMinCred" value="0" min="0"/></div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelNewJob">Cancel</button>
+                <button type="submit" class="btn-primary">Post Job</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- VIEW APPLICANTS MODAL -->
+<div class="modal-overlay" id="applicantsModal" style="display:none">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="applicantsModalTitle">Applicants</h3>
+            <button class="modal-close" id="closeApplicantsModal">✕</button>
+        </div>
+        <div id="applicantsList" style="padding:24px;max-height:60vh;overflow-y:auto">
+            <div class="empty-state">Loading…</div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    Auth.requireAuth();
+    initSidebar();
+
+    let myCompanyId = null;
+    populateMonthYear('lbMonth', 'lbYear');
+
+    api.getMe().then(r => {
+        document.getElementById('headerCredits').textContent = r.data?.totalCredits ?? 0;
+        myCompanyId = r.data?.companyId;
+        document.getElementById('loadingState').style.display = 'none';
+        if (myCompanyId) {
+            loadCompany(myCompanyId);
+        } else {
+            document.getElementById('noCompanyState').style.display = 'block';
+        }
+    }).catch(err => {
+        document.getElementById('loadingState').textContent = err.message;
+    });
+
+    async function loadCompany(id) {
+        try {
+            const res = await api.getCompany(id);
+            const c = res.data;
+            document.getElementById('companyState').style.display = 'block';
+
+            document.getElementById('cDisplayName').textContent     = c.name;
+            document.getElementById('cDisplayIndustry').textContent  = c.industry || '—';
+            document.getElementById('cDisplayLocation').textContent  = c.location  || '—';
+            document.getElementById('cEmpCount').textContent         = c.employeeCount ?? 0;
+            document.getElementById('cMinCred').textContent          = c.minCreditThreshold ?? 0;
+
+            if (c.isVerified) document.getElementById('cVerifiedBadge').style.display = 'inline-flex';
+            const hiringBadge = document.getElementById('cHiringBadge');
+            if (c.isHiring) hiringBadge.style.display = 'inline-flex';
+
+            const hiringToggle = document.getElementById('hiringToggle');
+            hiringToggle.checked = c.isHiring;
+            hiringToggle.addEventListener('change', async () => {
+                try {
+                    await api.updateCompany(id, { isHiring: hiringToggle.checked });
+                    showToast(hiringToggle.checked ? 'Company is now hiring!' : 'Hiring paused.', 'success');
+                    hiringBadge.style.display = hiringToggle.checked ? 'inline-flex' : 'none';
+                } catch (err) { showToast(err.message, 'error'); hiringToggle.checked = !hiringToggle.checked; }
+            });
+
+            // Edit form prefill
+            document.getElementById('eDesc').value       = c.description   || '';
+            document.getElementById('eIndustry').value   = c.industry      || '';
+            document.getElementById('eLocation').value   = c.location      || '';
+            document.getElementById('eWebsite').value    = c.websiteUrl    || '';
+            document.getElementById('eMinCredits').value = c.minCreditThreshold || 0;
+
+            loadEmployees(id);
+            loadCompanyJobs(id);
+        } catch (err) {
+            showToast('Failed to load company: ' + err.message, 'error');
+        }
+    }
+
+    async function loadEmployees(cid) {
+        const tbody = document.getElementById('empTableBody');
+        try {
+            const res = await api.companyLeaderboardUsers(cid);
+            const emps = res.data || [];
+            if (!emps.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No employees yet.</td></tr>'; return; }
+            tbody.innerHTML = emps.map((e, i) => `
+            <tr>
+                <td><strong>${i + 1}</strong></td>
+                <td>
+                    <div class="user-cell">
+                        <div class="user-cell-avatar">${(e.fullName || '?')[0]}</div>
+                        <div class="user-cell-info">
+                            <span class="user-cell-name">${e.fullName || e.username}</span>
+                            <span class="user-cell-sub">@${e.username}</span>
+                        </div>
+                    </div>
+                </td>
+                <td style="color:var(--text-2)">${(e.role || '').replace('ROLE_', '')}</td>
+                <td style="color:var(--text-2)">${e.department || '—'}</td>
+                <td><span style="color:var(--accent);font-weight:700">✦ ${e.totalCredits}</span></td>
+                <td>
+                    <a href="/public/${e.username}" class="btn-secondary" style="font-size:0.75rem;padding:5px 10px;text-decoration:none">View</a>
+                </td>
+            </tr>`).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="6" class="empty-state">${err.message}</td></tr>`;
+        }
+    }
+
+    async function loadCompanyJobs(cid) {
+        const container = document.getElementById('companyJobsList');
+        try {
+            // Get all jobs and filter by company (using search)
+            const res = await api.searchAllJobs('', 0);
+            const jobs = (res.data?.content || []).filter(j => j.companyId == cid);
+            if (!jobs.length) { container.innerHTML = '<div class="empty-state">No job postings yet. Click "+ New Job" to create one.</div>'; return; }
+            container.innerHTML = jobs.map(j => `
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+                <div style="flex:1">
+                    <div style="font-weight:600">${j.title}</div>
+                    <div style="font-size:0.75rem;color:var(--text-3)">${j.jobType || ''} · Min ${j.minCreditsRequired} credits · ${j.applicationCount ?? 0} applicants</div>
+                </div>
+                <span style="font-size:0.75rem;padding:3px 10px;border-radius:999px;${j.isActive ? 'background:rgba(34,197,94,0.1);color:var(--green);border:1px solid var(--green)' : 'background:var(--bg-3);color:var(--text-3)'}">
+                    ${j.isActive ? 'Active' : 'Closed'}
+                </span>
+                <button class="btn-secondary view-apps-btn" data-jobid="${j.id}" data-jobtitle="${j.title}" style="font-size:0.78rem;padding:6px 12px">
+                    Applicants (${j.applicationCount ?? 0})
+                </button>
+            </div>`).join('');
+
+            container.querySelectorAll('.view-apps-btn').forEach(btn => {
+                btn.addEventListener('click', () => openApplicantsModal(btn.dataset.jobid, btn.dataset.jobtitle));
+            });
+        } catch (err) {
+            container.innerHTML = `<div class="empty-state">${err.message}</div>`;
+        }
+    }
+
+    // Leaderboard
+    document.getElementById('loadLbBtn')?.addEventListener('click', async () => {
+        const month = parseInt(document.getElementById('lbMonth').value);
+        const year  = parseInt(document.getElementById('lbYear').value);
+        if (!myCompanyId) return;
+        try {
+            const res = await api.companyLeaderboard(myCompanyId, month, year);
+            const entries = res.data?.entries || [];
+            const container = document.getElementById('companyLbContainer');
+            if (!entries.length) { container.innerHTML = '<div class="empty-state">No results published for this period.</div>'; return; }
+            container.innerHTML = `<table class="emp-table">
+                <thead><tr><th>Rank</th><th>Employee</th><th>Dept</th><th>Score</th><th>Grade</th><th>Credits</th></tr></thead>
+                <tbody>${entries.map(e => `
+                <tr>
+                    <td><strong style="color:${e.rank <= 3 ? 'var(--accent)' : 'var(--text-2)'}">#${e.rank}</strong></td>
+                    <td><div class="user-cell">
+                        <div class="user-cell-avatar">${(e.fullName||'?')[0]}</div>
+                        <div class="user-cell-info"><span class="user-cell-name">${e.fullName}</span><span class="user-cell-sub">${e.jobTitle||''}</span></div>
+                    </div></td>
+                    <td style="color:var(--text-2)">${e.department||'—'}</td>
+                    <td><strong style="color:var(--accent)">${e.percentageScore?.toFixed(1)}%</strong></td>
+                    <td><span class="grade-pill ${gradeClass(e.grade)}">${e.grade}</span></td>
+                    <td style="color:var(--green)">+${e.creditsEarned}</td>
+                </tr>`).join('')}
+                </tbody>
+            </table>`;
+        } catch (err) { showToast(err.message, 'error'); }
+    });
+
+    // Edit company
+    document.getElementById('editToggleBtn')?.addEventListener('click', () => {
+        document.getElementById('editCompanyForm').classList.toggle('open');
+    });
+    document.getElementById('cancelEdit')?.addEventListener('click', () => {
+        document.getElementById('editCompanyForm').classList.remove('open');
+    });
+    document.getElementById('editCompanyForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!myCompanyId) return;
+        try {
+            await api.updateCompany(myCompanyId, {
+                description: document.getElementById('eDesc').value,
+                industry: document.getElementById('eIndustry').value,
+                location: document.getElementById('eLocation').value,
+                websiteUrl: document.getElementById('eWebsite').value,
+                companySize: document.getElementById('eSize').value,
+                minCreditThreshold: parseInt(document.getElementById('eMinCredits').value)
+            });
+            showToast('Company updated!', 'success');
+            document.getElementById('editCompanyForm').classList.remove('open');
+            loadCompany(myCompanyId);
+        } catch (err) { showToast(err.message, 'error'); }
+    });
+
+    // Create company
+    document.getElementById('createCompanyForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            const res = await api.createCompany({
+                name: document.getElementById('cName').value,
+                description: document.getElementById('cDesc').value,
+                industry: document.getElementById('cIndustry').value,
+                location: document.getElementById('cLocation').value,
+                companySize: document.getElementById('cSize').value,
+                websiteUrl: document.getElementById('cWebsite').value,
+                minCreditThreshold: parseInt(document.getElementById('cMinCredits').value) || 0
+            });
+            myCompanyId = res.data.id;
+            showToast('Company created!', 'success');
+            document.getElementById('noCompanyState').style.display = 'none';
+            loadCompany(myCompanyId);
+        } catch (err) { showToast(err.message, 'error'); }
+    });
+
+    // New job modal
+    document.getElementById('newJobBtn')?.addEventListener('click', () => document.getElementById('newJobModal').style.display = 'flex');
+    document.getElementById('closeNewJobModal')?.addEventListener('click', () => document.getElementById('newJobModal').style.display = 'none');
+    document.getElementById('cancelNewJob')?.addEventListener('click', () => document.getElementById('newJobModal').style.display = 'none');
+    document.getElementById('newJobForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!myCompanyId) return;
+        try {
+            await api.postJob(myCompanyId, {
+                title: document.getElementById('njTitle').value,
+                description: document.getElementById('njDesc').value,
+                requirements: document.getElementById('njReq').value,
+                salaryRange: document.getElementById('njSalary').value,
+                location: document.getElementById('njLocation').value,
+                jobType: document.getElementById('njType').value,
+                minCreditsRequired: parseInt(document.getElementById('njMinCred').value) || 0
+            });
+            showToast('Job posted!', 'success');
+            document.getElementById('newJobModal').style.display = 'none';
+            e.target.reset();
+            loadCompanyJobs(myCompanyId);
+        } catch (err) { showToast(err.message, 'error'); }
+    });
+
+    // Applicants modal
+    async function openApplicantsModal(jobId, jobTitle) {
+        document.getElementById('applicantsModalTitle').textContent = `Applicants – ${jobTitle}`;
+        document.getElementById('applicantsModal').style.display = 'flex';
+        const list = document.getElementById('applicantsList');
+        list.innerHTML = '<div class="empty-state">Loading…</div>';
+        try {
+            const res = await api.jobApplications(jobId);
+            const apps = res.data || [];
+            if (!apps.length) { list.innerHTML = '<div class="empty-state">No applications yet.</div>'; return; }
+            list.innerHTML = apps.map(app => `
+            <div style="padding:14px 0;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start">
+                <div class="user-cell-avatar" style="width:40px;height:40px;flex-shrink:0">${(app.applicantName||'?')[0]}</div>
+                <div style="flex:1">
+                    <div style="font-weight:600">${app.applicantName}</div>
+                    <div style="font-size:0.75rem;color:var(--text-2)">${app.applicantEmail} · ${app.applicantJobTitle||'—'} · ✦ ${app.applicantCredits} credits</div>
+                    ${app.coverLetter ? `<div style="margin-top:8px;font-size:0.8rem;color:var(--text-2);font-style:italic;background:var(--bg-3);padding:8px 12px;border-radius:var(--radius)">"${app.coverLetter.slice(0,200)}${app.coverLetter.length>200?'…':''}"</div>` : ''}
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                    <span class="app-status ${app.status}">${app.status}</span>
+                    <div style="display:flex;gap:6px">
+                        <button class="btn-sm" style="background:var(--green);color:#000" onclick="updateStatus(${app.id},'ACCEPTED')">✓</button>
+                        <button class="btn-sm" style="background:var(--blue);color:#fff" onclick="updateStatus(${app.id},'SHORTLISTED')">★</button>
+                        <button class="btn-sm" style="background:var(--red);color:#fff" onclick="updateStatus(${app.id},'REJECTED')">✗</button>
+                    </div>
+                </div>
+            </div>`).join('');
+        } catch (err) { list.innerHTML = `<div class="empty-state">${err.message}</div>`; }
+    }
+
+    window.updateStatus = async (appId, status) => {
+        try {
+            await api.updateAppStatus(appId, status, '');
+            showToast(`Application ${status.toLowerCase()}!`, 'success');
+        } catch (err) { showToast(err.message, 'error'); }
+    };
+
+    document.getElementById('closeApplicantsModal')?.addEventListener('click', () => document.getElementById('applicantsModal').style.display = 'none');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+/* ============================================================
+   DASHBOARD CSS
+   ============================================================ */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.stat-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+.stat-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+.stat-primary {
+    background: linear-gradient(135deg, #1a1f0a 0%, #121a06 100%);
+    border-color: rgba(232,255,71,0.25);
+}
+.stat-label { font-size: 0.75rem; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.stat-value { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 4px; line-height: 1; }
+.stat-primary .stat-value { color: var(--accent); }
+.stat-sub { font-size: 0.75rem; color: var(--text-3); }
+.stat-decoration {
+    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    font-size: 2.5rem;
+    opacity: 0.07;
+    color: var(--accent);
+}
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.dash-section.full-width { grid-column: 1 / -1; }
+
+/* CATEGORY LIST */
+.category-list { display: flex; flex-direction: column; gap: 10px; }
+.category-item {
+    display: flex; align-items: center; gap: 12px;
+}
+.cat-name { font-size: 0.82rem; color: var(--text-2); width: 140px; flex-shrink: 0; }
+.cat-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-3);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.cat-bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+}
+.cat-bar.low { background: var(--red); }
+.cat-bar.mid { background: var(--orange); }
+.cat-bar.good { background: var(--blue); }
+.cat-bar.great { background: var(--green); }
+.cat-bar.top { background: var(--accent); }
+.cat-pct { font-size: 0.78rem; color: var(--text-2); width: 40px; text-align: right; }
+.cat-count { font-size: 0.72rem; color: var(--text-3); width: 55px; text-align: right; }
+
+/* MONTH SELECTOR */
+.month-selector { display: flex; align-items: center; gap: 8px; }
+
+/* BADGE GRID */
+.badge-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.badge-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    min-width: 200px;
+    transition: var(--transition);
+}
+.badge-card:hover { border-color: var(--border-2); }
+.badge-card-info { display: flex; flex-direction: column; gap: 2px; }
+.badge-card-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+.badge-card-date { font-size: 0.72rem; color: var(--text-3); }
+
+@media (max-width: 1100px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .dash-grid { grid-template-columns: 1fr; }
+}
